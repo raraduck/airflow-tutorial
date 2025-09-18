@@ -40,5 +40,5 @@ if __name__ == "__main__":
     parser.add_argument("--secret-key", required=True, help="AWS Secret Key")
 
     args = parser.parse_args()
-    print(args.access_key, args.secret_key)
-    # main(args.access_key, args.secret_key)
+    # print(args.access_key, args.secret_key)
+    main(args.access_key, args.secret_key)
