@@ -69,7 +69,6 @@ with DAG(
         python_callable=check_spark
     )
 
-    from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
     run_spark_etl = SparkSubmitOperator(
         task_id="run_user_order_etl",
         application="/var/lib/airflow/spark/check_spark.py",  # 위 스크립트 경로
@@ -92,6 +91,7 @@ with DAG(
 # init main 부분 추가
 # =====================
 if __name__ == "__main__":
+    from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
     parser = argparse.ArgumentParser(description="Run Spark job with AWS credentials")
     parser.add_argument("--access-key", required=True, help="AWS Access Key")
     parser.add_argument("--secret-key", required=True, help="AWS Secret Key")
