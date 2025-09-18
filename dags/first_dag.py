@@ -92,7 +92,6 @@ with DAG(
 # init main 부분 추가
 # =====================
 if __name__ == "__main__":
-    from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
     parser = argparse.ArgumentParser(description="Run Spark job with AWS credentials")
     parser.add_argument("--access-key", required=True, help="AWS Access Key")
     parser.add_argument("--secret-key", required=True, help="AWS Secret Key")
