@@ -2,6 +2,8 @@ from airflow import DAG
 from airflow.operators.dummy import DummyOperator
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
+from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+
 from datetime import datetime
 import os, shutil
 import findspark
@@ -24,6 +26,7 @@ with DAG(
     default_args={"start_date": datetime(2024, 12, 1)},
     schedule_interval="@daily",
     catchup=False,
+    tags=["spark", "batch"],
 ) as dag:
     start = DummyOperator(task_id="start")
 
@@ -55,6 +58,7 @@ with DAG(
 
         # 처음 몇 줄 출력
         df.show(10, truncate=False)
+        spark.stop()
 
     python_task = PythonOperator(
         task_id='python_task',
@@ -66,9 +70,23 @@ with DAG(
         python_callable=check_spark
     )
 
+    run_spark_etl = SparkSubmitOperator(
+        task_id="run_user_order_etl",
+        application="/var/lib/airflow/spark/check_spark.py",  # 위 스크립트 경로
+        conn_id="spark_default",                          # Airflow에 설정된 Spark 연결 ID
+        verbose=True,
+        application_args=[
+            "--access-key",  os.getenv("AWS_ACCESS_KEY_ID"),
+            "--secret-key",  os.getenv("AWS_SECRET_ACCESS_KEY"),
+            # "--users",  "s3a://databricks-workspace-stack-60801-bucket/users_orders/users.csv",
+            # "--orders", "s3a://databricks-workspace-stack-60801-bucket/users_orders/orders.json"
+        ],
+    )
+
+
     end = DummyOperator(task_id="end")
 
-    start >> bash_task >> python_task >> spark_task >> end
+    start >> bash_task >> python_task >> spark_task >> run_spark_etl >> end
 
 # =====================
 # init main 부분 추가
