@@ -10,7 +10,6 @@ import findspark
 import argparse
 from dotenv import load_dotenv  # ✅ 추가
 load_dotenv(dotenv_path="/var/lib/airflow/.env")  # 필요시 절대경로 지정
-
 # os.environ["JAVA_HOME"] = "/usr/lib/jvm/java-1.8.0-amazon-corretto.x86_64/jre"
 # os.environ["SPARK_HOME"] = "/var/lib/airflow/spark/spark-3.4.1-bin-hadoop3"
 # os.environ["PATH"]       = f'{os.environ["SPARK_HOME"]}/bin:{os.environ["SPARK_HOME"]}/sbin:' + os.environ["PATH"]
@@ -19,12 +18,12 @@ os.environ["JAVA_HOME"] = os.getenv("JAVA_HOME", "/usr/lib/jvm/java-1.8.0-amazon
 os.environ["SPARK_HOME"] = os.getenv("SPARK_HOME", "/var/lib/airflow/spark/spark-3.4.1-bin-hadoop3")
 os.environ["PATH"] = f'{os.environ["SPARK_HOME"]}/bin:{os.environ["SPARK_HOME"]}/sbin:' + os.environ["PATH"]
 findspark.init(os.environ["SPARK_HOME"])
+from pyspark.sql import SparkSession
 
 def python_print():
     print("python")
 
 def check_spark(access_key: str=None, secret_key: str=None):
-    from pyspark.sql import SparkSession
     spark = SparkSession.builder \
         .appName("first-spark-app") \
         .master("local[*]") \
