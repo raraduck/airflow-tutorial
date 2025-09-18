@@ -20,6 +20,7 @@ os.environ["PATH"] = f'{os.environ["SPARK_HOME"]}/bin:{os.environ["SPARK_HOME"]}
 findspark.init(os.environ["SPARK_HOME"])
 
 
+from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 with DAG(
     dag_id="my_first_spark_dag",
     default_args={"start_date": datetime(2024, 12, 1)},
@@ -69,7 +70,6 @@ with DAG(
         python_callable=check_spark
     )
 
-    from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
     run_spark_etl = SparkSubmitOperator(
         task_id="run_user_order_etl",
         application="/var/lib/airflow/spark/check_spark.py",  # 위 스크립트 경로
