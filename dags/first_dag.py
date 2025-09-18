@@ -35,7 +35,7 @@ with DAG(
     def python_print():
         print("python")
 
-    def check_spark(access_key: str, secret_key: str):
+    def check_spark(access_key: str=None, secret_key: str=None):
         from pyspark.sql import SparkSession
         spark = SparkSession.builder \
             .appName("first-spark-app") \
