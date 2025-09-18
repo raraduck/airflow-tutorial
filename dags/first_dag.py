@@ -64,11 +64,14 @@ def check_spark(access_key: str=None, secret_key: str=None):
 
     raw = spark.read.text(orders_path)
     
-    # JSON 배열 부분만 추출
-    json_rdd = raw.rdd.map(lambda row: row[0]) \
-        .filter(lambda line: line.strip().startswith("{"))  # JSON 오브젝트만 남김
-    orders_df = spark.read.json(json_rdd, schema=orders_schema)
-    # orders_df = spark.read.json(orders_path, schema=orders_schema)
+    # RTF/제어문자 제거 + 역슬래시 제거
+    json_lines = raw.rdd.map(lambda row: row[0]) \
+        .map(lambda line: line.strip()) \
+        .filter(lambda line: line.startswith("{") or line.startswith("[")) \
+        .map(lambda line: line.replace("\\", ""))  # \{ → { 로 정리
+
+    # Spark에 JSON으로 다시 읽기
+    orders_df = spark.read.json(json_lines, schema=orders_schema)
     orders_df.show(10, truncate=False)
 
     # ---------------------------
