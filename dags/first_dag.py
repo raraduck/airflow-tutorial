@@ -32,6 +32,8 @@ with DAG(
         spark = SparkSession.builder \
             .appName("first-spark-app") \
             .master("local[*]") \
+            .config("spark.jars", "/var/lib/airflow/spark/jars/hadoop-aws-3.3.4.jar,/var/lib/airflow/spark/jars/aws-java-sdk-bundle-1.12.262.jar") \
+            .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
             .config("spark.hadoop.fs.s3a.access.key", access_key) \
             .config("spark.hadoop.fs.s3a.secret.key", secret_key) \
             .config("spark.hadoop.fs.s3a.endpoint", "s3.amazonaws.com") \
@@ -41,7 +43,7 @@ with DAG(
         # df = spark.range(10)
         # df.show()
 
-        df = spark.read.text("s3://databricks-workspace-stack-60801-bucket/users_orders/users.csv")
+        df = spark.read.text("s3a://databricks-workspace-stack-60801-bucket/users_orders/users.csv")
 
         # 처음 몇 줄 출력
         df.show(10, truncate=False)
