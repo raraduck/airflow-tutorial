@@ -50,7 +50,7 @@ def process_data(access_key, secret_key, users_path=None, orders_path=None):
         print("Orders file:", orders_path)
 
     spark = SparkSession.builder \
-        .appName("first-spark-app") \
+        .appName("virtualenv-spark-app") \
         .master("local[*]") \
         .config("spark.jars", "/var/lib/airflow/spark/jars/hadoop-aws-3.3.4.jar,/var/lib/airflow/spark/jars/aws-java-sdk-bundle-1.12.262.jar") \
         .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
