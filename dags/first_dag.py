@@ -61,7 +61,14 @@ def check_spark(access_key: str=None, secret_key: str=None):
     # ---------------------------
     users_df = spark.read.csv(users_path, header=True, schema=users_schema)
     users_df.show(10, truncate=False)
-    orders_df = spark.read.json(orders_path, schema=orders_schema)
+
+    raw = spark.read.text(orders_path)
+    
+    # JSON 배열 부분만 추출
+    json_rdd = raw.rdd.map(lambda row: row[0]) \
+        .filter(lambda line: line.strip().startswith("{"))  # JSON 오브젝트만 남김
+    orders_df = spark.read.json(json_rdd, schema=orders_schema)
+    # orders_df = spark.read.json(orders_path, schema=orders_schema)
     orders_df.show(10, truncate=False)
 
     # ---------------------------
