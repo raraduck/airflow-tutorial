@@ -65,6 +65,126 @@ def process_data(access_key, secret_key, users_path=None, orders_path=None):
     df2.show(10, truncate=False)
     spark.stop()
 
+def hw5_8(access_key, secret_key, users_path=None, orders_path=None):
+    from pyspark.sql import SparkSession
+    from pyspark.sql import functions as F
+    from pyspark.sql.types import (
+        StructType, StructField, StringType, IntegerType, DoubleType, DateType
+    )
+
+    spark = SparkSession.builder \
+        .appName("spark-app") \
+        .master("local[*]") \
+        .config("spark.jars", "/var/lib/airflow/spark/jars/hadoop-aws-3.3.4.jar,/var/lib/airflow/spark/jars/aws-java-sdk-bundle-1.12.262.jar") \
+        .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
+        .config("spark.hadoop.fs.s3a.access.key", access_key) \
+        .config("spark.hadoop.fs.s3a.secret.key", secret_key) \
+        .config("spark.hadoop.fs.s3a.endpoint", "s3.amazonaws.com") \
+        .getOrCreate()
+
+    # ---------------------------
+    # 1. 스키마 정의
+    # ---------------------------
+    users_schema = StructType([
+        StructField("user_id", StringType(), True),
+        StructField("name", StringType(), True),
+        StructField("gender", StringType(), True),
+    ])
+
+    orders_schema = StructType([
+        StructField("order_id", StringType(), True),
+        StructField("user_id", StringType(), True),
+        StructField("order_ts", StringType(), True),  # String → Date 변환 예정
+        StructField("amount", DoubleType(), True),
+    ])
+
+    # ---------------------------
+    # 2. DataFrame 로드
+    # ---------------------------
+    users_df = spark.read.csv(users_path, header=True, schema=users_schema)
+    orders_df = spark.read.json(orders_path, schema=orders_schema)
+
+    # ---------------------------
+    # 3. 컬럼 추가/변환
+    # ---------------------------
+    users_df = users_df.withColumn("signup_year", F.lit(2023).cast(IntegerType()))
+    orders_df = orders_df.withColumn("order_date", F.to_date("order_ts"))
+
+    # ---------------------------
+    # 4. Join
+    # ---------------------------
+    joined_df = users_df.join(orders_df, on="user_id", how="inner") \
+        .select(
+            "order_id", "user_id", "name", "gender",
+            "signup_year", "order_date", "amount"
+        )
+
+    # ---------------------------
+    # 5. Dataset API 타입 안정성
+    # ---------------------------
+    # (PySpark에서는 TypedDict 대체로 schema 기반 처리)
+    from typing import TypedDict
+
+    class JoinedSchema(TypedDict):
+        order_id: str
+        user_id: str
+        name: str
+        gender: str
+        signup_year: int
+        order_date: str
+        amount: float
+
+    # Dataset 흉내: schema 기반 DataFrame
+    joined_df.printSchema()
+
+    # ---------------------------
+    # 6. amount >= 100 필터링
+    # ---------------------------
+    filtered_df = joined_df.filter(F.col("amount") >= 100)
+
+    print("=== amount >= 100 주문만 출력 ===")
+    filtered_df.show(truncate=False)
+
+    # ---------------------------
+    # 7. UDF 정의 및 적용
+    # ---------------------------
+    def segment_by_year(year: int) -> str:
+        if year < 2020:
+            return "OLD"
+        elif 2020 <= year <= 2022:
+            return "MID"
+        else:
+            return "NEW"
+
+    from pyspark.sql.functions import udf
+    segment_udf = udf(segment_by_year, StringType())
+
+    final_df = filtered_df.withColumn("user_segment", segment_udf("signup_year"))
+
+    print("=== UDF 적용 결과 ===")
+    final_df.show(truncate=False)
+
+    # ---------------------------
+    # 8. Spark SQL로 비교
+    # ---------------------------
+    final_df.createOrReplaceTempView("joined_table")
+
+    sql_result = spark.sql("""
+        SELECT order_id, user_id, name, gender, signup_year, order_date, amount,
+               CASE
+                   WHEN signup_year < 2020 THEN 'OLD'
+                   WHEN signup_year BETWEEN 2020 AND 2022 THEN 'MID'
+                   ELSE 'NEW'
+               END AS user_segment
+        FROM joined_table
+        WHERE amount >= 100
+    """)
+
+    print("=== SQL 결과 ===")
+    sql_result.show(truncate=False)
+
+    spark.stop()
+
 with DAG(
     dag_id="virtualenv-spark-app",
     default_args={"start_date": datetime(2024, 12, 1)},
@@ -91,7 +211,7 @@ with DAG(
 
     virtualenv_task = PythonVirtualenvOperator(
         task_id="virtualenv_task",
-        python_callable=process_data,
+        python_callable=hw5_8,
         requirements=[
             "pandas==2.2.2", 
             "scikit-learn==1.5.1",
