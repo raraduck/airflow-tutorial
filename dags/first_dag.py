@@ -59,10 +59,47 @@ def process_data(access_key, secret_key, users_path=None, orders_path=None):
         .config("spark.hadoop.fs.s3a.endpoint", "s3.amazonaws.com") \
         .getOrCreate()
 
-    df1 = spark.read.text(users_path)
-    df1.show(10, truncate=False)
-    df2 = spark.read.text(orders_path)
-    df2.show(10, truncate=False)
+    # ---------------------------
+    # 1. 스키마 정의
+    # ---------------------------
+    users_schema = StructType([
+        StructField("user_id", StringType(), True),
+        StructField("name", StringType(), True),
+        StructField("gender", StringType(), True),
+    ])
+
+    orders_schema = StructType([
+        StructField("order_id", StringType(), True),
+        StructField("user_id", StringType(), True),
+        StructField("order_ts", StringType(), True),  # String → Date 변환 예정
+        StructField("amount", DoubleType(), True),
+    ])
+
+    # ---------------------------
+    # 2. DataFrame 로드
+    # ---------------------------
+    users_df = spark.read.csv(users_path, header=True, schema=users_schema)
+    orders_df = spark.read.json(orders_path, schema=orders_schema)
+
+    # ---------------------------
+    # 3. 컬럼 추가/변환
+    # ---------------------------
+    users_df = users_df.withColumn("signup_year", F.lit(2023).cast(IntegerType()))
+    orders_df = orders_df.withColumn("order_date", F.to_date("order_ts"))
+
+    # ---------------------------
+    # 4. Join
+    # ---------------------------
+    joined_df = users_df.join(orders_df, on="user_id", how="inner") \
+        .select(
+            "order_id", "user_id", "name", "gender",
+            "signup_year", "order_date", "amount"
+        )
+    joined_df.show(10, truncate=False)
+    # df1 = spark.read.text(users_path)
+    # df1.show(10, truncate=False)
+    # df2 = spark.read.text(orders_path)
+    # df2.show(10, truncate=False)
     spark.stop()
 
 def hw5_8(access_key, secret_key, users_path=None, orders_path=None):
