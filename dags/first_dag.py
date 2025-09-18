@@ -34,31 +34,8 @@ def check_spark(access_key: str=None, secret_key: str=None):
         .config("spark.hadoop.fs.s3a.endpoint", "s3.amazonaws.com") \
         .getOrCreate()
 
-    df = spark.read.text("s3a://databricks-workspace-stack-60801-bucket/users_orders/users.csv")
-
-    # 처음 몇 줄 출력
-    df.show(10, truncate=False)
-    spark.stop()
-
-def process_data(access_key, secret_key, users_path=None, orders_path=None):
-    from pyspark.sql import SparkSession
-    print("Access Key:", access_key)
-    print("Secret Key:", secret_key)
-    if users_path:
-        print("Users file:", users_path)
-    if orders_path:
-        print("Orders file:", orders_path)
-
-    spark = SparkSession.builder \
-        .appName("spark-app") \
-        .master("local[*]") \
-        .config("spark.jars", "/var/lib/airflow/spark/jars/hadoop-aws-3.3.4.jar,/var/lib/airflow/spark/jars/aws-java-sdk-bundle-1.12.262.jar") \
-        .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
-        .config("spark.hadoop.fs.s3a.access.key", access_key) \
-        .config("spark.hadoop.fs.s3a.secret.key", secret_key) \
-        .config("spark.hadoop.fs.s3a.endpoint", "s3.amazonaws.com") \
-        .getOrCreate()
-
+    users_path = "s3a://databricks-workspace-stack-60801-bucket/users_orders/users.csv"
+    orders_path = "s3a://databricks-workspace-stack-60801-bucket/users_orders/orders.json"
     # ---------------------------
     # 1. 스키마 정의
     # ---------------------------
@@ -95,11 +72,34 @@ def process_data(access_key, secret_key, users_path=None, orders_path=None):
             "order_id", "user_id", "name", "gender",
             "signup_year", "order_date", "amount"
         )
-    joined_df.show(10, truncate=False)
-    # df1 = spark.read.text(users_path)
-    # df1.show(10, truncate=False)
-    # df2 = spark.read.text(orders_path)
-    # df2.show(10, truncate=False)
+
+    # 처음 몇 줄 출력
+    df.show(10, truncate=False)
+    spark.stop()
+
+def process_data(access_key, secret_key, users_path=None, orders_path=None):
+    from pyspark.sql import SparkSession
+    print("Access Key:", access_key)
+    print("Secret Key:", secret_key)
+    if users_path:
+        print("Users file:", users_path)
+    if orders_path:
+        print("Orders file:", orders_path)
+
+    spark = SparkSession.builder \
+        .appName("spark-app") \
+        .master("local[*]") \
+        .config("spark.jars", "/var/lib/airflow/spark/jars/hadoop-aws-3.3.4.jar,/var/lib/airflow/spark/jars/aws-java-sdk-bundle-1.12.262.jar") \
+        .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
+        .config("spark.hadoop.fs.s3a.access.key", access_key) \
+        .config("spark.hadoop.fs.s3a.secret.key", secret_key) \
+        .config("spark.hadoop.fs.s3a.endpoint", "s3.amazonaws.com") \
+        .getOrCreate()
+
+    df1 = spark.read.text(users_path)
+    df1.show(10, truncate=False)
+    df2 = spark.read.text(orders_path)
+    df2.show(10, truncate=False)
     spark.stop()
 
 def hw5_8(access_key, secret_key, users_path=None, orders_path=None):
