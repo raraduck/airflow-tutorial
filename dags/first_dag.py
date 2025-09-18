@@ -104,8 +104,8 @@ with DAG(
             os.getenv("AWS_SECRET_ACCESS_KEY"),
         ],
         op_kwargs={
-            "users_path": "s3a://bucket/users_orders/users.csv",
-            "orders_path": "s3a://bucket/users_orders/orders.json",
+            "users_path": "s3a://databricks-workspace-stack-60801-bucket/users_orders/users.csv",
+            "orders_path": "s3a://databricks-workspace-stack-60801-bucket/users_orders/orders.json",
         },
     )
 
