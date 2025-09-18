@@ -41,7 +41,7 @@ with DAG(
         # df = spark.range(10)
         # df.show()
 
-        df = spark.read.text("s3a://databricks-workspace-stack-60801-bucket/users_orders/users.csv")
+        df = spark.read.text("s3://databricks-workspace-stack-60801-bucket/users_orders/users.csv")
 
         # 처음 몇 줄 출력
         df.show(10, truncate=False)
