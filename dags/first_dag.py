@@ -55,3 +55,9 @@ with DAG(
     end = DummyOperator(task_id="end")
 
     start >> bash_task >> python_task >> spark_task >> end
+
+# =====================
+# init main 부분 추가
+# =====================
+if __name__ == "__main__":
+    check_spark()
