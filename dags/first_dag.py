@@ -187,10 +187,13 @@ def hw5_8(access_key, secret_key, users_path=None, orders_path=None):
 
 with DAG(
     dag_id="virtualenv-spark-app",
-    default_args={"start_date": datetime(2024, 12, 1)},
-    schedule_interval="@daily",
+    start_date=datetime(2025, 9, 1),
+    schedule_interval="0 6 * * *",  # 매일 오전 6시
     catchup=False,
-    tags=["spark", "batch"],
+    # default_args={"start_date": datetime(2024, 12, 1)},
+    # schedule_interval="@daily",
+    # catchup=False,
+    # tags=["spark", "batch"],
 ) as dag:
     start = DummyOperator(task_id="start")
 
@@ -213,10 +216,10 @@ with DAG(
         task_id="virtualenv_task",
         python_callable=hw5_8,
         requirements=[
-            "pandas==2.2.2", 
-            "scikit-learn==1.5.1",
+            # "pandas==2.2.2", 
+            # "scikit-learn==1.5.1",
             "pyspark==3.4.1",
-            "boto3",
+            # "boto3",
             ],
         system_site_packages=False,
         op_args=[
