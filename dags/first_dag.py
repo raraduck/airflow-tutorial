@@ -2,7 +2,6 @@ from airflow import DAG
 from airflow.operators.dummy import DummyOperator
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
-from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 
 from datetime import datetime
 import os, shutil
@@ -21,6 +20,7 @@ os.environ["PATH"] = f'{os.environ["SPARK_HOME"]}/bin:{os.environ["SPARK_HOME"]}
 findspark.init(os.environ["SPARK_HOME"])
 
 
+from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 with DAG(
     dag_id="my_first_spark_dag",
     default_args={"start_date": datetime(2024, 12, 1)},
