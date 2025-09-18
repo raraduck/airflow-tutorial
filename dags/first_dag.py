@@ -60,7 +60,9 @@ def check_spark(access_key: str=None, secret_key: str=None):
     # 2. DataFrame 로드
     # ---------------------------
     users_df = spark.read.csv(users_path, header=True, schema=users_schema)
+    users_df.show(10, truncate=False)
     orders_df = spark.read.json(orders_path, schema=orders_schema)
+    orders_df.show(10, truncate=False)
 
     # ---------------------------
     # 3. 컬럼 추가/변환
