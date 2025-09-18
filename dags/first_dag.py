@@ -1,6 +1,6 @@
 from airflow import DAG
 from airflow.operators.dummy import DummyOperator
-from airflow.operators.python import PythonOperator
+from airflow.operators.python import PythonOperator, PythonVirtualenvOperator
 from airflow.operators.bash import BashOperator
 # from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 
@@ -40,6 +40,31 @@ def check_spark(access_key: str=None, secret_key: str=None):
     df.show(10, truncate=False)
     spark.stop()
 
+def process_data(access_key, secret_key, users_path=None, orders_path=None):
+    from pyspark.sql import SparkSession
+    print("Access Key:", access_key)
+    print("Secret Key:", secret_key)
+    if users_path:
+        print("Users file:", users_path)
+    if orders_path:
+        print("Orders file:", orders_path)
+
+    spark = SparkSession.builder \
+        .appName("first-spark-app") \
+        .master("local[*]") \
+        .config("spark.jars", "/var/lib/airflow/spark/jars/hadoop-aws-3.3.4.jar,/var/lib/airflow/spark/jars/aws-java-sdk-bundle-1.12.262.jar") \
+        .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
+        .config("spark.hadoop.fs.s3a.access.key", access_key) \
+        .config("spark.hadoop.fs.s3a.secret.key", secret_key) \
+        .config("spark.hadoop.fs.s3a.endpoint", "s3.amazonaws.com") \
+        .getOrCreate()
+
+    df1 = spark.read.text(users_path)
+    df1.show(10, truncate=False)
+    df2 = spark.read.text(orders_path)
+    df2.show(10, truncate=False)
+    spark.stop()
+
 with DAG(
     dag_id="my_first_spark_dag",
     default_args={"start_date": datetime(2024, 12, 1)},
@@ -64,22 +89,29 @@ with DAG(
         python_callable=check_spark
     )
 
-    # run_spark_etl = SparkSubmitOperator(
-    #     task_id="run_user_order_etl",
-    #     application="/var/lib/airflow/spark/check_spark.py",  # 위 스크립트 경로
-    #     conn_id="spark_default",                          # Airflow에 설정된 Spark 연결 ID
-    #     verbose=True,
-    #     application_args=[
-    #         "--access-key",  os.getenv("AWS_ACCESS_KEY_ID"),
-    #         "--secret-key",  os.getenv("AWS_SECRET_ACCESS_KEY"),
-    #         # "--users",  "s3a://databricks-workspace-stack-60801-bucket/users_orders/users.csv",
-    #         # "--orders", "s3a://databricks-workspace-stack-60801-bucket/users_orders/orders.json"
-    #     ],
-    # )
+    virtualenv_task = PythonVirtualenvOperator(
+        task_id="virtualenv_task",
+        python_callable=process_data,
+        requirements=[
+            "pandas==2.2.2", 
+            "scikit-learn==1.5.1",
+            "pyspark==3.4.1",
+            "boto3",
+            ],
+        system_site_packages=False,
+        op_args=[
+            os.getenv("AWS_ACCESS_KEY_ID"),
+            os.getenv("AWS_SECRET_ACCESS_KEY"),
+        ],
+        op_kwargs={
+            "users_path": "s3a://bucket/users_orders/users.csv",
+            "orders_path": "s3a://bucket/users_orders/orders.json",
+        },
+    )
 
     end = DummyOperator(task_id="end")
 
-    start >> bash_task >> python_task >> spark_task >> end
+    start >> virtualenv_task >> end
 
 # =====================
 # init main 부분 추가
