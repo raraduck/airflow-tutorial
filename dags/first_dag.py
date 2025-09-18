@@ -78,7 +78,7 @@ def check_spark(access_key: str=None, secret_key: str=None):
         )
 
     # 처음 몇 줄 출력
-    df.show(10, truncate=False)
+    joined_df.show(10, truncate=False)
     spark.stop()
 
 def process_data(access_key, secret_key, users_path=None, orders_path=None):
