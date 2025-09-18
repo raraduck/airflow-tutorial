@@ -46,7 +46,12 @@ with DAG(
         task_id='python_task',
         python_callable=python_print
     )
+    
+    spark_task = PythonOperator(
+        task_id='spark_task',
+        python_callable=check_spark
+    )
 
     end = DummyOperator(task_id="end")
 
-    start >> bash_task >> python_task >> end
+    start >> bash_task >> python_task >> spark_task >> end
