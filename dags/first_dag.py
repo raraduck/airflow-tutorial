@@ -50,7 +50,7 @@ def process_data(access_key, secret_key, users_path=None, orders_path=None):
         print("Orders file:", orders_path)
 
     spark = SparkSession.builder \
-        .appName("virtualenv-spark-app") \
+        .appName("spark-app") \
         .master("local[*]") \
         .config("spark.jars", "/var/lib/airflow/spark/jars/hadoop-aws-3.3.4.jar,/var/lib/airflow/spark/jars/aws-java-sdk-bundle-1.12.262.jar") \
         .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
@@ -66,7 +66,7 @@ def process_data(access_key, secret_key, users_path=None, orders_path=None):
     spark.stop()
 
 with DAG(
-    dag_id="my_first_spark_dag",
+    dag_id="virtualenv-spark-app",
     default_args={"start_date": datetime(2024, 12, 1)},
     schedule_interval="@daily",
     catchup=False,
