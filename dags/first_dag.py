@@ -7,7 +7,7 @@ from pyspark.sql import SparkSession
 import os, shutil, pyspark
 
 with DAG(
-    dag_id="my_first_dag",
+    dag_id="my_first_spark_dag",
     default_args={"start_date": datetime(2024, 12, 1)},
     schedule_interval="@daily",
     catchup=False,
