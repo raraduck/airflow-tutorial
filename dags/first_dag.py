@@ -24,6 +24,10 @@ def python_print():
 
 def check_spark(access_key: str=None, secret_key: str=None):
     from pyspark.sql import SparkSession
+    from pyspark.sql import functions as F
+    from pyspark.sql.types import (
+        StructType, StructField, StringType, IntegerType, DoubleType, DateType
+    )
     spark = SparkSession.builder \
         .appName("first-spark-app") \
         .master("local[*]") \
