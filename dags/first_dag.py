@@ -77,7 +77,8 @@ def check_spark(access_key: str=None, secret_key: str=None):
         .filter(lambda line: line.startswith("{") or line.startswith("["))
 
     # Spark에 JSON으로 다시 읽기
-    orders_df = spark.read.json(json_lines, schema=orders_schema)
+    # orders_df = spark.read.json(json_lines, schema=orders_schema)
+    orders_df = spark.read.json(json_lines, schema=orders_schema, multiLine=True)
     orders_df.show(10, truncate=False)
 
     # ---------------------------
