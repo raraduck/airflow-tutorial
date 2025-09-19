@@ -226,7 +226,7 @@ def hw5_8(access_key, secret_key, users_path=None, orders_path=None):
     # print("=== amount >= 100 주문만 출력 ===")
     # filtered_df.show(truncate=False)
     print("=== amount >= 100 주문 목록 (JSON) ===")
-    for row in filtered_df:
+    for row in filtered_df.toJSON().collect():
         print(row)
 
     # ---------------------------
