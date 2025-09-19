@@ -183,8 +183,14 @@ def hw5_8(access_key, secret_key, users_path=None, orders_path=None):
     # ---------------------------
     # 3. 컬럼 추가/변환
     # ---------------------------
-    users_df = users_df.withColumn("signup_year", F.lit(2023).cast(IntegerType()))
-    orders_df = orders_df.withColumn("order_date", F.to_date("order_ts"))
+    users_df = users_df.withColumn(
+        "signup_year", 
+        F.year(F.to_timestamp("signup_ts", "yyyy.M.d H:mm")).cast(IntegerType())
+    )
+    orders_df = orders_df.withColumn(
+        "order_date", 
+        F.to_date("order_ts")
+    )
 
     # ---------------------------
     # 4. Join
