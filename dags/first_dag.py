@@ -189,6 +189,9 @@ def hw5_8(access_key, secret_key, users_path=None, orders_path=None):
         F.year(F.to_timestamp("signup_ts", "yyyy.M.d H:mm")).cast(IntegerType())
         # F.lit(2023).cast(IntegerType())
     )
+    print("=== Users 테이블 (signup_year 포함) ===")
+    users_df.show(truncate=False)
+    
     orders_df = orders_df.withColumn("order_date", F.to_date("order_ts"))
 
     # ---------------------------
