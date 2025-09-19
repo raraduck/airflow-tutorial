@@ -163,6 +163,7 @@ with DAG(
     schedule_interval="0 6 * * *",  # Cron 표현식: 매일 06:00
     start_date=days_ago(1),
     catchup=False, # 과거 실행 분은 건너뛰기
+    tags=["spark", "batch"],
 ) as dag:
     start = DummyOperator(task_id="start")
 
