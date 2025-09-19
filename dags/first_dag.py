@@ -79,7 +79,9 @@ def check_spark(access_key: str=None, secret_key: str=None):
     # Spark에 JSON으로 다시 읽기
     # orders_df = spark.read.json(json_lines, schema=orders_schema)
     orders_df = spark.read.json(json_lines, schema=orders_schema, multiLine=True)
-    orders_df.show(10, truncate=False)
+    # 모든 컬럼이 null 인 row 제거
+    orders_df = orders_df.dropna(how="all")
+    orders_df.show(20, truncate=False)
 
     # ---------------------------
     # 3. 컬럼 추가/변환
