@@ -223,8 +223,11 @@ def hw5_8(access_key, secret_key, users_path=None, orders_path=None):
     # ---------------------------
     filtered_df = joined_df.filter(F.col("amount") >= 100)
 
-    print("=== amount >= 100 주문만 출력 ===")
-    filtered_df.show(truncate=False)
+    # print("=== amount >= 100 주문만 출력 ===")
+    # filtered_df.show(truncate=False)
+    print("=== amount >= 100 주문 목록 (JSON) ===")
+    for row in filtered_df:
+        print(row)
 
     # ---------------------------
     # 7. UDF 정의 및 적용
@@ -240,7 +243,7 @@ def hw5_8(access_key, secret_key, users_path=None, orders_path=None):
     from pyspark.sql.functions import udf
     segment_udf = udf(segment_by_year, StringType())
 
-    final_df = filtered_df.withColumn("user_segment", segment_udf("signup_year"))
+    final_df = joined_df.withColumn("user_segment", segment_udf("signup_year"))
 
     print("=== UDF 적용 결과 ===")
     final_df.show(truncate=False)
