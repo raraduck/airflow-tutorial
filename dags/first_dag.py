@@ -164,7 +164,21 @@ def hw5_8(access_key, secret_key, users_path=None, orders_path=None):
     # 2. DataFrame 로드
     # ---------------------------
     users_df = spark.read.csv(users_path, header=True, schema=users_schema)
-    orders_df = spark.read.json(orders_path, schema=orders_schema)
+    # orders_df = spark.read.json(orders_path, schema=orders_schema)
+    raw = spark.read.text(orders_path)
+    
+    # RTF/제어문자 제거 + 역슬래시 제거
+    json_lines = raw.rdd.map(lambda row: row[0]) \
+        .map(lambda line: line.strip()) \
+        .filter(lambda line: line.startswith("{") or line.startswith("[") or line.startswith("\\{")) \
+        .map(lambda line: line.replace("\\", "")) \
+        .filter(lambda line: line.startswith("{") or line.startswith("["))
+
+    # Spark에 JSON으로 다시 읽기
+    orders_df = spark.read.json(json_lines, schema=orders_schema, multiLine=True)
+    # 모든 컬럼이 null 인 row 제거
+    orders_df = orders_df.dropna(how="all")
+    # orders_df.show(20, truncate=False)
 
     # ---------------------------
     # 3. 컬럼 추가/변환
