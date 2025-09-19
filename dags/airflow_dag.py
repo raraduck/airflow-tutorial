@@ -2,7 +2,6 @@ from airflow import DAG
 from airflow.operators.dummy import DummyOperator
 from airflow.operators.python import PythonVirtualenvOperator
 from airflow.utils.dates import days_ago
-# from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 
 from datetime import datetime
 import os, shutil
