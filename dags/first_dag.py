@@ -65,10 +65,16 @@ def check_spark(access_key: str=None, secret_key: str=None):
     raw = spark.read.text(orders_path)
     
     # RTF/제어문자 제거 + 역슬래시 제거
+    # json_lines = raw.rdd.map(lambda row: row[0]) \
+    #     .map(lambda line: line.strip()) \
+    #     .filter(lambda line: line.startswith("{") or line.startswith("[")) \
+    #     .map(lambda line: line.replace("\\", ""))  # \{ → { 로 정리
+
     json_lines = raw.rdd.map(lambda row: row[0]) \
         .map(lambda line: line.strip()) \
-        .filter(lambda line: line.startswith("{") or line.startswith("[")) \
-        .map(lambda line: line.replace("\\", ""))  # \{ → { 로 정리
+        .filter(lambda line: line.startswith("{") or line.startswith("[") or line.startswith("\\{")) \
+        .map(lambda line: line.replace("\\", "")) \
+        .filter(lambda line: line.startswith("{") or line.startswith("["))
 
     # Spark에 JSON으로 다시 읽기
     orders_df = spark.read.json(json_lines, schema=orders_schema)

@@ -19,7 +19,7 @@ with DAG(
         json={
             "existing_cluster_id": "0918-132607-3d0hh606",
             "notebook_task": {
-                "notebook_path": "/Workspace/Users/dwngcp2506@gmail.com/notebook01.ipynb",  # 워크스페이스 경로
+                "notebook_path": "/Workspace/Users/dwngcp2506@gmail.com/notebook01",  # 워크스페이스 경로
                 # "base_parameters": {
                 #     "input": "dbfs:/mnt/input",
                 #     "output": "dbfs:/mnt/output"
