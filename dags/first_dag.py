@@ -261,7 +261,6 @@ def hw5_8(access_key, secret_key, users_path=None, orders_path=None):
                    ELSE 'NEW'
                END AS user_segment
         FROM joined_table
-        WHERE amount >= 100
     """)
 
     print("=== SQL 결과 ===")
