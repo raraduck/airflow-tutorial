@@ -151,6 +151,7 @@ def hw5_8(access_key, secret_key, users_path=None, orders_path=None):
         StructField("user_id", StringType(), True),
         StructField("name", StringType(), True),
         StructField("gender", StringType(), True),
+        StructField("signup_ts", StringType(), True),  # ← 추가
     ])
 
     orders_schema = StructType([
@@ -186,11 +187,9 @@ def hw5_8(access_key, secret_key, users_path=None, orders_path=None):
     users_df = users_df.withColumn(
         "signup_year", 
         F.year(F.to_timestamp("signup_ts", "yyyy.M.d H:mm")).cast(IntegerType())
+        # F.lit(2023).cast(IntegerType())
     )
-    orders_df = orders_df.withColumn(
-        "order_date", 
-        F.to_date("order_ts")
-    )
+    orders_df = orders_df.withColumn("order_date", F.to_date("order_ts"))
 
     # ---------------------------
     # 4. Join
