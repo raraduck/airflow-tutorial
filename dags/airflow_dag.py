@@ -158,7 +158,7 @@ def process_data(access_key, secret_key, users_path=None, orders_path=None):
 with DAG(
     dag_id="daily_user_order_processing",
     description="매일 오전 6시에 Spark ETL 스크립트를 실행하는 DAG",
-    start_date=datetime(2025, 9, 1),
+    # start_date=datetime(2025, 9, 1),
     schedule_interval="0 6 * * *",  # Cron 표현식: 매일 06:00
     start_date=days_ago(1),
     catchup=False, # 과거 실행 분은 건너뛰기
