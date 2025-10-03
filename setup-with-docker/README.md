@@ -51,3 +51,46 @@ Now you can start all services in background:
 ```bash
 docker compose up -d
 ```
+
+- Airflow 2.8+ / 3.x: from airflow.operators.empty import EmptyOperator
+- Airflow 2.x ~ 3.x: from airflow.operators.python import PythonOperator
+- schedule_interval → ❌ (Airflow 3.x에서 제거됨), schedule → ✅ 사용해야 함
+
+## 4. Tips for Airflow Connection (CLI version)
+```bash
+airflow connections add 'my_s3' \
+    --conn-type 's3' \
+    --conn-login 'AWS_ACCESS_KEY_ID' \
+    --conn-password 'AWS_SECRET_ACCESS_KEY' \
+    --conn-extra '{"region_name": "ap-northeast-2"}'
+
+airflow connections add 'my_databricks' \
+    --conn-type 'databricks' \
+    --conn-host 'https://<your-databricks-instance>' \
+    --conn-login 'token' \
+    --conn-password '<DATABRICKS_PERSONAL_ACCESS_TOKEN>'
+```
+
+## 5. Tips for CLI Control
+```bash
+#1. cli 명령 1회성
+docker exec -it airflow-airflow-scheduler-1 airflow dags list
+
+#2. cli mode 접속
+docker exec -it airflow-airflow-scheduler-1 /bin/bash
+
+#3. dag 목록 보기
+airflow dags list
+
+#4. dag import error 보기
+airflow dags list-import-errors
+
+#5. DAG 실행 트리거하기
+airflow dags trigger sample_dag
+
+#6. 실행 내역 확인
+airflow dags list-runs -d sample_dag
+
+#7. Task 목록 보기
+airflow tasks list sample_dag
+```
