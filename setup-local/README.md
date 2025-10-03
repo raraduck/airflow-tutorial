@@ -168,6 +168,6 @@ root$ sudo su - airflow
 airflow$ AIRFLOW_HOME=/var/lib/airflow airflow users create --role Admin --username admin --email admin --firstname admin --lastname admin --password admin
 # User "admin" created with role "Admin"
 ```
-Open 8080 port in Security Group adn Access.
+Access to http://<publicIP>:8080 with 8080 port opened in Security Group.
 
 
