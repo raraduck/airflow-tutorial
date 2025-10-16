@@ -69,6 +69,11 @@ airflow connections add 'my_databricks' \
     --conn-host 'https://<your-databricks-instance>' \
     --conn-login 'token' \
     --conn-password '<DATABRICKS_PERSONAL_ACCESS_TOKEN>'
+
+airflow connections add 'spark_default' \
+    --conn-type 'spark' \
+    --conn-host 'spark://spark-master' \
+    --conn-port '7077'
 ```
 
 ## 5. Tips for CLI Control
