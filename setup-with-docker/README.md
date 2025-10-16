@@ -58,6 +58,12 @@ docker compose up -d
 
 ## 4. Tips for Airflow Connection (CLI version)
 ```bash
+airflow connections add 'aws_default' \
+    --conn-type 'aws' \
+    --conn-login 'AWS_ACCESS_KEY_ID' \
+    --conn-password 'AWS_SECRET_ACCESS_KEY' \
+    --conn-extra '{"region_name": "us-east-2"}'
+
 airflow connections add 'my_s3' \
     --conn-type 's3' \
     --conn-login 'AWS_ACCESS_KEY_ID' \
